@@ -3,6 +3,14 @@ import streamlit as st
 import pickle
 import numpy as np
 from sklearn.preprocessing import StandardScaler,LabelEncoder
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
+
+uri = "mongodb+srv://Dhinesh:Test123@fetquestprojects.fpaoxah.mongodb.net/?retryWrites=true&w=majority&appName=FETQuestProjects"
+client = MongoClient(uri, server_api=ServerApi('1'))
+db = client['student']
+collection = db["student_pred"]
+
 
 def load_model():
     print("here in load_model")
@@ -46,6 +54,9 @@ def main():
         }
         prediction = predict_data(user_data)
         st.success(f"your prediction result is {prediction}")
+        user_data = {k: v.item() if isinstance(v, (np.integer, np.floating)) else v for k, v in user_data.items()}
+        user_data['prediction'] = round(float(prediction[0]), 2)
+        collection.insert_one(user_data)
 
 if __name__ == "__main__":
     main()
